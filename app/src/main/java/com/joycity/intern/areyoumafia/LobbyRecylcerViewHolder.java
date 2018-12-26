@@ -9,10 +9,12 @@ import android.widget.TextView;
 public class LobbyRecylcerViewHolder extends RecyclerView.ViewHolder {
     public CardView room;
     public TextView room_name;
+    public TextView room_person;
     public LobbyRecylcerViewHolder(@NonNull View itemView) {
         super(itemView);
 
         room = itemView.findViewById(R.id.room);
         room_name = itemView.findViewById(R.id.room_name);
+        room_person = itemView.findViewById(R.id.room_person);
     }
 }

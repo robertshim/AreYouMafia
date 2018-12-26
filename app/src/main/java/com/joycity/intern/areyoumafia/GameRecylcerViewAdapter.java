@@ -23,8 +23,10 @@ public class GameRecylcerViewAdapter extends RecyclerView.Adapter<GameRecylcerVi
         if(i == 0){
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_chat_main,viewGroup,false);
         }
-        else{
+        else if(i == 1){
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_chat_other,viewGroup,false);
+        }else{
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_chat_join,viewGroup,false);
         }
         return new GameRecylcerViewHolder(view, i);
     }
@@ -33,7 +35,7 @@ public class GameRecylcerViewAdapter extends RecyclerView.Adapter<GameRecylcerVi
     public void onBindViewHolder(@NonNull GameRecylcerViewHolder gameRecylcerViewHolder, int i) {
         if(items.get(i).who == 0){
             gameRecylcerViewHolder.contents.setText(items.get(i).contents);
-        }else{
+        }else if(items.get(i).who == 1){
             gameRecylcerViewHolder.profile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -41,6 +43,8 @@ public class GameRecylcerViewAdapter extends RecyclerView.Adapter<GameRecylcerVi
                 }
             });
 
+            gameRecylcerViewHolder.contents.setText(items.get(i).contents);
+        }else{
             gameRecylcerViewHolder.contents.setText(items.get(i).contents);
         }
     }

@@ -5,8 +5,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +56,7 @@ public class LobbyActivity extends AppCompatActivity {
                 requestQueue();
             }
         });
+        items = new ArrayList<>();
     }
 
 
@@ -56,14 +64,31 @@ public class LobbyActivity extends AppCompatActivity {
     private void searchRooms(){
         ApplicationController controller = (ApplicationController)getApplicationContext();
         String sessionkey = controller.getSessionkey();
-        Call<Map<String, Object>> getRooms = controller.getNetworkService().getRooms(sessionkey);
+        final Call<Map<String, Object>> getRooms = controller.getNetworkService().getRooms(sessionkey);
 
         getRooms.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
 
                 if(response.isSuccessful()){
-                    items = (List<RoomInfo>) response.body().get("body");
+                    Log.d("error_home","Search Room");
+                    Log.d("error_home",response.body().get("body").toString());
+                    Gson gson = new Gson();
+                    try{
+                    JSONArray jsonArray = new JSONArray(response.body().get("body").toString());
+                        for(int i=0; i < jsonArray.length(); i++){
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            int id = jsonObject.getInt("id");
+                            String url = jsonObject.getString("url");
+                            int port = jsonObject.getInt("port");
+                            int numOfPlayer = jsonObject.getInt("numOfPlayer");
+                            RoomInfo info = new RoomInfo(id,url,port,numOfPlayer);
+                            items.add(info);
+                        }
+                    }
+                    catch (Exception e){
+                    }
+                    Log.d("error_home",String.valueOf(items.size()));
                     adapter.addItems(items);
                 }
             }
@@ -78,18 +103,28 @@ public class LobbyActivity extends AppCompatActivity {
 
     private void makeRoom(){
         ApplicationController controller = (ApplicationController)getApplicationContext();
-        String sessionkey = controller.getSessionkey();
+        String sessionkey = controller.getId();
         Call<Map<String, Object>> postRooms = controller.getNetworkService().postRooms(sessionkey);
         postRooms.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
 
                 if(response.isSuccessful()){
-                    RoomInfo info = (RoomInfo) response.body().get("body");
-                    if(info !=null){
+                    Log.d("error_home","Make Room");
+                    try{
+                        JSONObject jsonObject = new JSONObject(response.body().get("body").toString());
+                        int id = jsonObject.getInt("id");
+                        String url = jsonObject.getString("url");
+                        int port = jsonObject.getInt("port");
+                        int numOfPlayer = jsonObject.getInt("numOfPlayer");
+                        RoomInfo info = new RoomInfo(id,url,port,numOfPlayer);
+
                         Intent intent = new Intent(getApplicationContext(), GameActivity.class);
                         intent.putExtra("info",info);
                         startActivity(intent);
+
+                    }catch (Exception e){
+
                     }
                 }
 
@@ -129,11 +164,22 @@ public class LobbyActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if(response.isSuccessful()){
-                    RoomInfo info = (RoomInfo) response.body().get("body");
-                    if(info !=null){
-                        Intent intent = new Intent(getApplicationContext(),GameActivity.class);
+                    Log.d("error_home","Enter Room");
+                    //RoomInfo info = (RoomInfo) response.body().get("body");
+                    try{
+                        JSONObject jsonObject = new JSONObject(response.body().get("body").toString());
+                        int id = jsonObject.getInt("id");
+                        String url = jsonObject.getString("url");
+                        int port = jsonObject.getInt("port");
+                        int numOfPlayer = jsonObject.getInt("numOfPlayer");
+                        RoomInfo info = new RoomInfo(id,url,port,numOfPlayer);
+
+                        Intent intent = new Intent(getApplicationContext(), GameActivity.class);
                         intent.putExtra("info",info);
                         startActivity(intent);
+
+                    }catch (Exception e){
+
                     }
                 }
             }

@@ -8,6 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApplicationController extends Application {
     private NetworkService networkService;
     private String sessionkey;
+    private String id;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -32,6 +33,14 @@ public class ApplicationController extends Application {
 
     public void setSessionkey(String sessionkey) {
         this.sessionkey = sessionkey;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getSessionkey() {

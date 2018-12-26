@@ -3,21 +3,22 @@ package com.joycity.intern.areyoumafia;
 import java.util.Map;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface NetworkService {
-    @FormUrlEncoded
+    @Headers({"Content-Type: application/json"})
     @POST("signup")
-    Call<Map<String,Object>> signUp(@Field("id") String id, @Field("password") String password);
+    Call<Map<String,Object>> signUp(@Body User user);
 
-    @FormUrlEncoded
     @POST("login")
-    Call<Map<String,Object>> login(@Field("id") String id, @Field("password") String password);
+    Call<Map<String,Object>> login(@Body User user);
 
     @GET("rooms")
     Call<Map<String,Object>> getRooms(@Header("JSESSION") String sessionkey);

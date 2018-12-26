@@ -8,6 +8,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -40,16 +44,16 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signUp(String id, String password){
-        Call<Map<String, Object>> signUp = ((ApplicationController)getApplicationContext()).getNetworkService().signUp(id, password);
+        Call<Map<String, Object>> signUp = ((ApplicationController)getApplicationContext()).getNetworkService().signUp(new User(id, password));
 
         signUp.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                Log.d("error_home","signup");
                 if(response.isSuccessful()){
+                    Log.d("error_home","signup");
                     String result = (String)response.body().get("result");
                     if(result.compareTo("success") == 0){
-                        String sessionkey = (String)response.body().get("sessionkey");
+                        String sessionkey = (String)response.body().get("body");
                         ((ApplicationController)getApplicationContext()).setSessionkey(sessionkey);
 
                         Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
@@ -57,6 +61,8 @@ public class SignUpActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 }
+
+                Log.d("error_home",String.valueOf(response.code()));
             }
 
             @Override

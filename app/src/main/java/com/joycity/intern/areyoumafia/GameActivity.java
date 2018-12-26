@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,7 +16,13 @@ import android.widget.TextView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -40,6 +47,8 @@ public class GameActivity extends AppCompatActivity {
     private SocketThread socketThread;
     private Handler writeHandler;
     private boolean flagRead;
+    private int joinPerson = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +64,7 @@ public class GameActivity extends AppCompatActivity {
         room_name = findViewById(R.id.room_name);
         numOfPerson = findViewById(R.id.numOfPerson);
 
-        room_name.setText(info.id);
+        room_name.setText(String.valueOf(info.id));
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -66,14 +75,37 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        handler = new Handler();
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                GameMessage message = (GameMessage) msg.obj;
+                ChatInfo chatInfo = new ChatInfo();
+                if(message.type == GameMessage.MESSAGE_TYPE.JOIN){
+                    joinPerson++;
+                    numOfPerson.setText("참가 인원수 : "+String.valueOf(joinPerson));
+                    chatInfo.contents = message.text.toString();
+                    adapter.addItems(items);
+                }else if(message.type == GameMessage.MESSAGE_TYPE.CHAT){
+                    //메세지를 보낸 사람이 누구냐에 따라서 who 값이 바뀐다.
+                    chatInfo.contents = message.text.toString();
+                }else if(message.type == GameMessage.MESSAGE_TYPE.VOTE){
+
+                }
+            }
+        };
         adapter = new GameRecylcerViewAdapter(items);
 
         chat_list.setAdapter(adapter);
         chat_list.setLayoutManager(new LinearLayoutManager(this));
+
+        socketThread = new SocketThread();
+        socketThread.start();
     }
 
 
+
+
+    //연결이 끊겼는지를 확인하는 소켓
     private class SocketThread extends Thread{
         private BufferedOutputStream bout;
         private BufferedInputStream bin;
@@ -83,9 +115,9 @@ public class GameActivity extends AppCompatActivity {
                 try{
                     if(!isConnection){
                         Socket socket = new Socket();
-                        SocketAddress remoteAddr = new InetSocketAddress("",0);
+                        SocketAddress remoteAddr = new InetSocketAddress(info.url,(int)info.port);
                         socket.connect(remoteAddr, 10000);
-
+                        Log.d("gameLog","연결 완료");
                         bout = new BufferedOutputStream(socket.getOutputStream());
                         bin = new BufferedInputStream(socket.getInputStream());
 
@@ -116,6 +148,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
 
+    //보내기를 누르면 전송시켜주는 스레드
     private class WriteThread extends Thread{
         private BufferedOutputStream bout;
 
@@ -125,24 +158,24 @@ public class GameActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            Log.d("gameLog","Write 스레드");
             Looper.prepare();
             writeHandler = new Handler(){
                 @Override
                 public void handleMessage(Message msg) {
                     try{
-                        final String contents = (String)msg.obj;
-                        bout.write(contents.getBytes());
+                        GameMessage gameMessage = new GameMessage();
+                        gameMessage.roomId = (int)info.id;
+                        gameMessage.type = GameMessage.MESSAGE_TYPE.CHAT;
+                        gameMessage.text = ((String)msg.obj).toCharArray();
+                        //gameMessage.write;
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        ObjectOutput out = null;
+                        out = new ObjectOutputStream(bos);
+                        out.writeObject(gameMessage);
+                        bout.write(bos.toByteArray());
                         bout.flush();
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ChatInfo info = new ChatInfo();
-                                info.who = 0;
-                                info.contents = contents;
-                                items.add(info);
-                                adapter.addItems(items);
-                            }
-                        });
+
                     }catch (IOException e){
                         e.printStackTrace();
                         isConnection = false;
@@ -156,7 +189,7 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-
+    //지속적으로 읽는 스레드
     private class ReadThread extends Thread{
         private BufferedInputStream bin;
 
@@ -166,29 +199,27 @@ public class GameActivity extends AppCompatActivity {
 
         @Override
         public void run() {
+            Log.d("gameLog","Read 스레드");
+            GameMessage gameMessage = null;
             byte[] buffer = null;
             while(flagRead){
                 buffer = new byte[1024];
 
                 try{
-                    String message = null;
                     int size = bin.read(buffer);
-
                     if(size >0){
-                        message = new String(buffer, 0, size, "utf-8");
-                        if(!message.equals("")){
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
+                        Log.d("gameLog","수신 완료");
+                        ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
+                        ObjectInput in = new ObjectInputStream(bis);
+                        Message message = new Message();
+                        message.obj = in.readObject();
 
-                                }
-                            });
-                        }
+                        handler.sendMessage(message);
                     }else{
                         flagRead = false;
                         isConnection = false;
                     }
-                }catch (IOException e){
+                }catch (Exception e){
                     e.printStackTrace();
                     flagRead = false;
                     isConnection = false;

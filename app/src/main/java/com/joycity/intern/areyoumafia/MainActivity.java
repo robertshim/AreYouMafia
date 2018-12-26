@@ -3,6 +3,7 @@ package com.joycity.intern.areyoumafia;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        edit_id = findViewById(R.id.edit_id);
+        edit_password = findViewById(R.id.edit_password);
 
         btn_signUp = findViewById(R.id.btn_signup);
         btn_ok = findViewById(R.id.btn_ok);
@@ -45,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void login(String id, String password){
-        Call<Map<String, Object>> login = ((ApplicationController)getApplicationContext()).getNetworkService().login(id, password);
+    private void login(final String id, String password){
+        Call<Map<String, Object>> login = ((ApplicationController)getApplicationContext()).getNetworkService().login(new User(id,password));
 
         login.enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -54,9 +58,12 @@ public class MainActivity extends AppCompatActivity {
                 if(response.isSuccessful()){
                     String result = (String)response.body().get("result");
                     if(result.compareTo("success") == 0){
-                        String sessionkey = (String)response.body().get("sessionkey");
+                        String sessionkey = (String)response.body().get("body");
+                        Log.d("error_home",sessionkey);
                         ((ApplicationController)getApplicationContext()).setSessionkey(sessionkey);
-
+                        //임시
+                        ((ApplicationController)getApplicationContext()).setId(id);
+                        //
                         Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);

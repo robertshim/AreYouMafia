@@ -30,11 +30,12 @@ public class LobbyRecyclerViewAdapter extends RecyclerView.Adapter<LobbyRecylcer
         lobbyRecylcerViewHolder.room.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.enterTheRoom(items.get(lobbyRecylcerViewHolder.getAdapterPosition()).id);
+                activity.enterTheRoom((int)items.get(lobbyRecylcerViewHolder.getAdapterPosition()).id);
             }
         });
 
-        lobbyRecylcerViewHolder.room_name.setText(items.get(i).id);
+        lobbyRecylcerViewHolder.room_name.setText(String.valueOf(items.get(i).id));
+        lobbyRecylcerViewHolder.room_person.setText(items.get(i).numOfPlayer + " / 6");
     }
 
     @Override
