@@ -42,10 +42,10 @@ public class GameRecylcerViewAdapter extends RecyclerView.Adapter<GameRecylcerVi
 
                 }
             });
-
+            gameRecylcerViewHolder.id.setText(items.get(i).id);
             gameRecylcerViewHolder.contents.setText(items.get(i).contents);
         }else{
-            gameRecylcerViewHolder.contents.setText(items.get(i).contents);
+            gameRecylcerViewHolder.join.setText(items.get(i).contents);
         }
     }
 
@@ -61,6 +61,7 @@ public class GameRecylcerViewAdapter extends RecyclerView.Adapter<GameRecylcerVi
 
     public void addItems(List<ChatInfo> items){
         this.items = items;
+        notifyDataSetChanged();
     }
 
 }

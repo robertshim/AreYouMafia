@@ -17,9 +17,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
+            android:id="@+id/beforeGame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="5dp">
+            android:paddingStart="5dp"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/room_id"
@@ -40,6 +42,55 @@
                 android:textSize="16sp" />
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/gameStart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:id="@+id/box"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true">
+                <TextView
+                    android:id="@+id/sub1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="당신의 직업은 "
+                    android:textColor="#000000"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/your_job"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="000"
+                    android:layout_toEndOf="@+id/sub1"
+                    android:textColor="#000000"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/sub2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="입니다."
+                    android:layout_toEndOf="@id/your_job"
+                    android:textColor="#000000"
+                    android:textSize="20sp" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/alive_person"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/box"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="30dp"
+                android:text="살아남은 인원 수 : "
+                android:textSize="16sp" />
+
+        </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
     <View

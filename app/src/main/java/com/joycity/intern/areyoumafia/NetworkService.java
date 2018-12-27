@@ -27,9 +27,8 @@ public interface NetworkService {
     @POST("rooms")
     Call<Map<String,Object>> postRooms(@Header("JSESSION") String sessionkey);
 
-    @POST("rooms/{room_id}")
+    @GET("rooms/{room_id}")
     Call<Map<String,Object>> getRoom(@Header("JSESSION") String sessionkey, @Path("room_id") int room_id);
-
 
     @POST("matching")
     Call<Map<String, Object>> requestMatching(@Header("JSESSION") String sessionkey);

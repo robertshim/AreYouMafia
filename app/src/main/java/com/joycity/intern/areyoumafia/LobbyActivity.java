@@ -74,6 +74,7 @@ public class LobbyActivity extends AppCompatActivity {
                     Log.d("error_home","Search Room");
                     Log.d("error_home",response.body().get("body").toString());
                     Gson gson = new Gson();
+                    RoomInfo info = null;
                     try{
                     JSONArray jsonArray = new JSONArray(response.body().get("body").toString());
                         for(int i=0; i < jsonArray.length(); i++){
@@ -82,13 +83,15 @@ public class LobbyActivity extends AppCompatActivity {
                             String url = jsonObject.getString("url");
                             int port = jsonObject.getInt("port");
                             int numOfPlayer = jsonObject.getInt("numOfPlayer");
-                            RoomInfo info = new RoomInfo(id,url,port,numOfPlayer);
+                            info = new RoomInfo(id,url,port,numOfPlayer);
+                        }
+                        items.clear();
+                        if(info != null){
                             items.add(info);
                         }
                     }
                     catch (Exception e){
                     }
-                    Log.d("error_home",String.valueOf(items.size()));
                     adapter.addItems(items);
                 }
             }
@@ -118,7 +121,7 @@ public class LobbyActivity extends AppCompatActivity {
                         int port = jsonObject.getInt("port");
                         int numOfPlayer = jsonObject.getInt("numOfPlayer");
                         RoomInfo info = new RoomInfo(id,url,port,numOfPlayer);
-
+                        Log.d("error_home",response.body().get("body").toString());
                         Intent intent = new Intent(getApplicationContext(), GameActivity.class);
                         intent.putExtra("info",info);
                         startActivity(intent);
@@ -158,7 +161,7 @@ public class LobbyActivity extends AppCompatActivity {
 
     public void enterTheRoom(int room_id){
         ApplicationController controller = (ApplicationController)getApplicationContext();
-        String sessionkey = controller.getSessionkey();
+        String sessionkey = controller.getId();
         Call<Map<String, Object>> getRoom = controller.getNetworkService().getRoom(sessionkey,room_id);
         getRoom.enqueue(new Callback<Map<String, Object>>() {
             @Override
