@@ -87,11 +87,10 @@ public class ResultActivity extends Activity {
                 }else{
                     result_job.setText("시민");
                 }
-
+                Intent intent = new Intent();
+                intent.putExtra("dead",message.writer);
+                setResult(RESULT_CANCELED,intent);
             }
-            Intent intent = new Intent();
-            intent.putExtra("dead",message.writer);
-            setResult(RESULT_CANCELED,intent);
         }else{
             if(message.writer.compareTo("MAFIA") == 0){
                 title.setText("마피아의 승리입니다!");

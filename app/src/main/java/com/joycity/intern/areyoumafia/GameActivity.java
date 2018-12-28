@@ -159,6 +159,7 @@ public class GameActivity extends AppCompatActivity {
                 ChatInfo chatInfo = new ChatInfo();
                 if(message.type == MessageType.JOIN){
                     joinPerson++;
+                    alivePerson = joinPerson;
                     numOfPerson.setText("참가 인원수 : "+String.valueOf(joinPerson));
                     chatInfo.contents = message.text;
                     chatInfo.who = 2;
@@ -188,7 +189,7 @@ public class GameActivity extends AppCompatActivity {
                     }else{
                         numOfPerson.setText("참가 인원수 : "+String.valueOf(joinPerson));
                     }
-                    chatInfo.contents = message.text+"님이 퇴장하셨습니다.";
+                    chatInfo.contents = message.writer+"님이 퇴장하셨습니다.";
                     chatInfo.who = 2;
                     Log.d("gameLog",message.text);
                     items.add(chatInfo);
@@ -265,12 +266,24 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 1000){
+            Log.d("gameLog",dead1);
             GameMessage gameMessage = new GameMessage(MessageType.VOTE_RESULT,info.id,writer,"");
             Log.d("gameLog","Vote Result "+writer);
             Message message = new Message();
             message.obj = gameMessage;
             writeHandler.sendMessage(message);
             dead1 = data.getStringExtra("dead");
+            if( dead1.compareTo(writer) == 0){
+                try{
+                    socket.close();
+                    flagConnection = false;
+                    flagRead = false;
+                    writeHandler.getLooper().quit();
+                    finish();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
         }else{
             if(resultCode == RESULT_OK){
                 isStart = false;
@@ -282,7 +295,8 @@ public class GameActivity extends AppCompatActivity {
             }
             else{
                 dead2 = data.getStringExtra("dead");
-                if( (dead1.compareTo(writer) == 0) || (dead2.compareTo(writer) == 0)){
+                Log.d("gameLog","kill" + dead2);
+                if( dead2.compareTo(writer) == 0){
                     try{
                         socket.close();
                         flagConnection = false;
