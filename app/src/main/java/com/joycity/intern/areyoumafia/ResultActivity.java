@@ -1,14 +1,14 @@
 package com.joycity.intern.areyoumafia;
 
+import android.app.Activity;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ResultActivity extends AppCompatActivity {
+public class ResultActivity extends Activity {
     private ConstraintLayout notSame;
     private ConstraintLayout same;
     private ConstraintLayout victory;
@@ -79,21 +79,35 @@ public class ResultActivity extends AppCompatActivity {
             }else{
                 notSame.setVisibility(View.VISIBLE);
                 result_id.setText(message.writer);
-                result_job.setText(message.text);
+                if(message.text.compareTo("MAFIA") == 0){
+                    result_job.setText("마피아");
+                }else if(message.text.compareTo("POLICE") == 0){
+                    result_job.setText("경찰");
+                }else{
+                    result_job.setText("시민");
+                }
+
             }
+            setResult(RESULT_CANCELED);
         }else{
             if(message.writer.compareTo("MAFIA") == 0){
+                title.setText("마피아의 승리입니다!");
                 victory.setVisibility(View.VISIBLE);
                 victory_id.setText(message.text);
                 jobImage.setImageResource(R.drawable.logo);
+                setResult(RESULT_OK);
             }else if(message.writer.compareTo("CIVIL") == 0){
+                title.setText("시민의 승리입니다!");
                 victory.setVisibility(View.VISIBLE);
                 jobImage.setImageResource(R.drawable.person);
                 victory_id.setVisibility(View.GONE);
+                setResult(RESULT_OK);
             }else{
+                title.setText("마피아에게 살해당했습니다.");
                 kill.setVisibility(View.VISIBLE);
                 dead_id.setText(message.writer);
                 dead_job.setText(message.text);
+                setResult(RESULT_CANCELED);
             }
 
         }
