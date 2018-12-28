@@ -1,11 +1,14 @@
 package com.joycity.intern.areyoumafia;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,6 +38,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class GameActivity extends AppCompatActivity {
     private List<ChatInfo> items;
@@ -63,6 +67,10 @@ public class GameActivity extends AppCompatActivity {
     private TextView yourJob;
     private TextView alive_person;
     private int alivePerson = 0;
+    private int mSelected;
+    private ProgressDialog progressDialog;
+    private String yourJobValue;
+    private List<String> aliveList;
     public class MessageType {
         final public static int CREATE = 1;
         final public static int CREATE_ACK = 2;
@@ -76,6 +84,10 @@ public class GameActivity extends AppCompatActivity {
         final public static int QUIT = 10;
         final public static int JOB = 11;
         final public static int START = 12;
+        final public static int ACTION = 13;
+        final public static int ACTION_RESULT = 14;
+        final public static int VOTE_RESULT = 15;
+        final public static int GAME_RESULT = 16;
     }
 
     @Override
@@ -140,7 +152,8 @@ public class GameActivity extends AppCompatActivity {
                     items.add(chatInfo);
                     adapter.addItems(items);
                 }else if(message.type == MessageType.VOTE){
-
+                    btn_send.setEnabled(false);
+                    makeVoteDialog("투표를 시작합니다.",message.type);
                 }else if(message.type == MessageType.QUIT){
                     joinPerson--;
                     numOfPerson.setText("참가 인원수 : "+String.valueOf(joinPerson));
@@ -155,22 +168,54 @@ public class GameActivity extends AppCompatActivity {
                     btn_send.setEnabled(false);
                     beforeGame.setVisibility(View.GONE);
                     gameStart.setVisibility(View.VISIBLE);
-                    alivePerson = 6;
+                    alivePerson = joinPerson;
                     alive_person.setText("살아남은 인원 수 : " + alivePerson);
-                    if(message.text.compareTo("마피아") == 0){
+                    yourJobValue = message.text;
+                    if(message.text.compareTo("MAFIA") == 0){
                         yourJob.setTextColor(Color.parseColor("#ff0000"));
-                    }else if(message.text.compareTo("경찰") == 1){
+                        yourJob.setText("마피아");
+                    }else if(message.text.compareTo("POLICE") == 1){
                         yourJob.setTextColor(Color.parseColor("#00ff00"));
+                        yourJob.setText("MAFIA");
+                    }else{
+                        yourJob.setText("시민");
                     }
-                    yourJob.setText(message.text);
                 }else if(message.type == MessageType.START){
+                    aliveList.clear();
+                    StringTokenizer stringTokenizer = new StringTokenizer(",");
+                    while(stringTokenizer.hasMoreTokens()){
+                        aliveList.add(stringTokenizer.nextToken());
+                    }
+                    Log.d("gameLog",String.valueOf(aliveList.size()));
                     Toast.makeText(getApplicationContext(), "채팅을 시작합니다.", Toast.LENGTH_LONG).show();
+                    btn_send.setEnabled(true);
+                }else if(message.type == MessageType.ACTION){
+                    if(yourJobValue.compareTo("MAFIA") == 0){
+                        progressDialog.dismiss();
+                        makeVoteDialog("대상을 선택하세요",message.type);
+                    }else if(yourJobValue.compareTo("POLICE") == 0){
+                        progressDialog.dismiss();
+                        makeVoteDialog("대상을 선택하세요",message.type);
+                    }else{
+                        makeProgressDialog("활동 완료를 대기 중");
+                    }
+                }else if(message.type == MessageType.ACTION_RESULT){
+                    showJob(message);
+                }else if(message.type == MessageType.VOTE_RESULT){
+                    progressDialog.dismiss();
+                    Intent intent = new Intent(getApplicationContext(),ResultActivity.class);
+                    intent.putExtra("message",message);
+                    startActivity(intent);
+                }else if(message.type == MessageType.GAME_RESULT){
+                    Intent intent = new Intent(getApplicationContext(),ResultActivity.class);
+                    intent.putExtra("message",message);
+                    startActivity(intent);
                     btn_send.setEnabled(true);
                 }
             }
         };
         adapter = new GameRecylcerViewAdapter(items);
-
+        aliveList = new ArrayList<>();
         chat_list.setAdapter(adapter);
         chat_list.setLayoutManager(new LinearLayoutManager(this));
         writer = ((ApplicationController)getApplicationContext()).getId();
@@ -180,7 +225,20 @@ public class GameActivity extends AppCompatActivity {
         socketThread.start();
     }
 
+    private void showJob(GameMessage message){
 
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(message.writer).setMessage("직업은 "+ message.text+"입니다.")
+                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        makeProgressDialog("활동 완료를 대기 중");
+                    }
+                });
+
+        builder.create().show();
+    }
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -265,7 +323,7 @@ public class GameActivity extends AppCompatActivity {
 
             //최초 1회
             try{
-                GameMessage data = new GameMessage(5, info.id, writer, writer + "님이 입장하셨습니다.");
+                GameMessage data = new GameMessage(MessageType.JOIN, info.id, writer, writer + "님이 입장하셨습니다.");
                 out.write(data.toBytes());
                 out.flush();
             }catch (IOException e){
@@ -331,5 +389,60 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+
+    private void makeVoteDialog(String string, final int type){
+        final CharSequence[] charSequences = new CharSequence[aliveList.size()];
+        for (int i = 0 ; i<aliveList.size(); i++){
+            //자신을 뺀 나머지를 생각한다.
+            if(aliveList.get(i).compareTo(writer) != 0){
+                charSequences[i] = aliveList.get(i);
+                Log.d("gameLog",charSequences[i].toString());
+            }
+        }
+        AlertDialog.Builder oDialog = new AlertDialog.Builder(this,
+                android.R.style.Theme_DeviceDefault_Light_Dialog_Alert);
+
+        oDialog.setTitle(string)
+                .setSingleChoiceItems(charSequences, -1, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        mSelected = which;
+                    }
+                })
+                .setNeutralButton("선택", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        if(type == MessageType.VOTE){
+                            GameMessage data = new GameMessage(MessageType.VOTE, info.id, writer, charSequences[which].toString());
+                            Message message = new Message();
+                            message.obj = data;
+                            writeHandler.sendMessage(message);
+                            makeProgressDialog("투표 완료를 대기 중");
+                        }
+                        else{
+                            GameMessage data = new GameMessage(MessageType.ACTION, info.id, writer, charSequences[which].toString());
+                            Message message = new Message();
+                            message.obj = data;
+                            writeHandler.sendMessage(message);
+                            if(yourJobValue.compareTo("POLICE") !=0)
+                                makeProgressDialog("활동 완료를 대기 중");
+                        }
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void makeProgressDialog(String string){
+        progressDialog = new ProgressDialog(getApplicationContext(),
+                android.R.style.Theme_DeviceDefault_Light_Dialog);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage(string);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+    }
 }
 

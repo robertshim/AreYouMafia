@@ -1,6 +1,9 @@
 package com.joycity.intern.areyoumafia;
 
-public class GameMessage {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class GameMessage implements Parcelable {
     int type;
     int roomId;
     String writer;
@@ -19,6 +22,38 @@ public class GameMessage {
         this.writer = writer;
         this.text = text;
     }
+
+    protected GameMessage(Parcel in) {
+        type = in.readInt();
+        roomId = in.readInt();
+        writer = in.readString();
+        text = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(type);
+        dest.writeInt(roomId);
+        dest.writeString(writer);
+        dest.writeString(text);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<GameMessage> CREATOR = new Creator<GameMessage>() {
+        @Override
+        public GameMessage createFromParcel(Parcel in) {
+            return new GameMessage(in);
+        }
+
+        @Override
+        public GameMessage[] newArray(int size) {
+            return new GameMessage[size];
+        }
+    };
 
     public byte[] toBytes() {
         byte[] bytes = new byte[152];
