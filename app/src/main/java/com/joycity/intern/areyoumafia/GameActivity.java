@@ -195,7 +195,7 @@ public class GameActivity extends AppCompatActivity {
                     adapter.addItems(items);
                 }else if(message.type == MessageType.JOB){
                     isReady = false;
-                    btn_ready.setBackgroundColor(Color.parseColor("#ff0000"));
+                    btn_ready.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#ff0000")));
                     isStart = true;
                     items.clear();
                     adapter.addItems(items);
