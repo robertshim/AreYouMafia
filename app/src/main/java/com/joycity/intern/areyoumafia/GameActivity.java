@@ -181,7 +181,7 @@ public class GameActivity extends AppCompatActivity {
                     btn_send.setEnabled(false);
                     makeVoteDialog("투표를 시작합니다.",message.type);
                 }else if(message.type == MessageType.QUIT){
-                    joinPerson--;
+                    joinPerson = Integer.valueOf(message.text);
                     alivePerson = joinPerson;
                     if(isStart == true){
                         alive_person.setText("살아남은 인원 수 : " + alivePerson);
@@ -288,6 +288,7 @@ public class GameActivity extends AppCompatActivity {
                         flagConnection = false;
                         flagRead = false;
                         writeHandler.getLooper().quit();
+                        finish();
                     }catch (IOException e){
                         e.printStackTrace();
                     }
