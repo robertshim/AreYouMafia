@@ -1,6 +1,7 @@
 package com.joycity.intern.areyoumafia;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.os.Bundle;
 import android.view.View;
@@ -88,7 +89,9 @@ public class ResultActivity extends Activity {
                 }
 
             }
-            setResult(RESULT_CANCELED);
+            Intent intent = new Intent();
+            intent.putExtra("dead",message.writer);
+            setResult(RESULT_CANCELED,intent);
         }else{
             if(message.writer.compareTo("MAFIA") == 0){
                 title.setText("마피아의 승리입니다!");
@@ -107,7 +110,9 @@ public class ResultActivity extends Activity {
                 kill.setVisibility(View.VISIBLE);
                 dead_id.setText(message.writer);
                 dead_job.setText(message.text);
-                setResult(RESULT_CANCELED);
+                Intent intent = new Intent();
+                intent.putExtra("dead",message.writer);
+                setResult(RESULT_CANCELED,intent);
             }
 
         }

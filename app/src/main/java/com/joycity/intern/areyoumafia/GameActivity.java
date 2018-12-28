@@ -75,7 +75,7 @@ public class GameActivity extends AppCompatActivity {
     private List<String> aliveList;
     private AlertDialog jobDialog;
     private boolean isStart = false;
-
+    private String dead1, dead2;
     private FloatingActionButton btn_ready;
     private boolean isReady = false;
     public class MessageType {
@@ -202,8 +202,6 @@ public class GameActivity extends AppCompatActivity {
                     btn_send.setEnabled(false);
                     beforeGame.setVisibility(View.GONE);
                     gameStart.setVisibility(View.VISIBLE);
-                    alivePerson = joinPerson;
-                    alive_person.setText("살아남은 인원 수 : " + alivePerson);
                     yourJobValue = message.text;
                     Log.d("gameLog",message.text);
                     if(message.text.compareTo("MAFIA") == 0){
@@ -216,11 +214,16 @@ public class GameActivity extends AppCompatActivity {
                         yourJob.setText("시민");
                     }
                 }else if(message.type == MessageType.START){
+                    dead1 = "";
+                    dead2 = "";
                     aliveList.clear();
+                    alive_person.setText("살아남은 인원 수 : " + alivePerson);
                     StringTokenizer stringTokenizer = new StringTokenizer(message.text,",");
                     while(stringTokenizer.hasMoreTokens()){
                         aliveList.add(stringTokenizer.nextToken());
                     }
+                    joinPerson = aliveList.size();
+                    alivePerson = joinPerson;
                     Log.d("gameLog",message.text);
                     Toast.makeText(getApplicationContext(), "채팅을 시작합니다.", Toast.LENGTH_LONG).show();
                     btn_send.setEnabled(true);
@@ -267,6 +270,7 @@ public class GameActivity extends AppCompatActivity {
             Message message = new Message();
             message.obj = gameMessage;
             writeHandler.sendMessage(message);
+            dead1 = data.getStringExtra("dead");
         }else{
             if(resultCode == RESULT_OK){
                 isStart = false;
@@ -275,6 +279,19 @@ public class GameActivity extends AppCompatActivity {
                 beforeGame.setVisibility(View.VISIBLE);
                 gameStart.setVisibility(View.GONE);
                 numOfPerson.setText("참가 인원수 : "+String.valueOf(joinPerson));
+            }
+            else{
+                dead2 = data.getStringExtra("dead");
+                if( (dead1.compareTo(writer) == 0) || (dead2.compareTo(writer) == 0)){
+                    try{
+                        socket.close();
+                        flagConnection = false;
+                        flagRead = false;
+                        writeHandler.getLooper().quit();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
