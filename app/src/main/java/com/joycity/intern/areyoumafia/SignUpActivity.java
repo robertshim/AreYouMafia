@@ -43,7 +43,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void signUp(String id, String password){
+    private void signUp(final String id, String password){
         Call<Map<String, Object>> signUp = ((ApplicationController)getApplicationContext()).getNetworkService().signUp(new User(id, password));
 
         signUp.enqueue(new Callback<Map<String, Object>>() {
@@ -55,7 +55,7 @@ public class SignUpActivity extends AppCompatActivity {
                     if(result.compareTo("success") == 0){
                         String sessionkey = (String)response.body().get("body");
                         ((ApplicationController)getApplicationContext()).setSessionkey(sessionkey);
-
+                        ((ApplicationController)getApplicationContext()).setId(id);
                         Intent intent = new Intent(getApplicationContext(), LobbyActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);

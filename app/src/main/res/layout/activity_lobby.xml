@@ -30,10 +30,10 @@
             android:text="방 만들기" />
 
         <Button
-            android:id="@+id/fast_start"
+            android:id="@+id/refresh"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="빠른시작" />
+            android:text="새로고침" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

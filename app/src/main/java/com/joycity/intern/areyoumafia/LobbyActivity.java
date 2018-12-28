@@ -25,7 +25,7 @@ import retrofit2.Response;
 
 public class LobbyActivity extends AppCompatActivity {
     private RecyclerView room_list;
-    private Button btn_make,btn_fast;
+    private Button btn_make,btn_refresh;
     private List<RoomInfo> items;
     private LobbyRecyclerViewAdapter adapter;
     @Override
@@ -34,7 +34,7 @@ public class LobbyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_lobby);
 
         btn_make = findViewById(R.id.make_room);
-        btn_fast = findViewById(R.id.fast_start);
+        btn_refresh = findViewById(R.id.refresh);
 
         room_list = findViewById(R.id.room_list);
 
@@ -50,10 +50,10 @@ public class LobbyActivity extends AppCompatActivity {
             }
         });
 
-        btn_fast.setOnClickListener(new View.OnClickListener() {
+        btn_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestQueue();
+                searchRooms();
             }
         });
         items = new ArrayList<>();
@@ -139,24 +139,6 @@ public class LobbyActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-
-    private void requestQueue(){
-        ApplicationController controller = (ApplicationController)getApplicationContext();
-        String sessionkey = controller.getSessionkey();
-        Call<Map<String, Object>> requestMatching = controller.getNetworkService().requestMatching(sessionkey);
-        requestMatching.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-
-            }
-        });
     }
 
     public void enterTheRoom(int room_id){

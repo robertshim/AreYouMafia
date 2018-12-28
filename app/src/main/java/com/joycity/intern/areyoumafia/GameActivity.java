@@ -174,6 +174,7 @@ public class GameActivity extends AppCompatActivity {
                     //메세지를 보낸 사람이 누구냐에 따라서 who 값이 바뀐다.
                     chatInfo.contents = message.text;
                     chatInfo.id = message.writer;
+                    Log.d("gameLog",chatInfo.contents);
                     items.add(chatInfo);
                     adapter.addItems(items);
                 }else if(message.type == MessageType.VOTE){
@@ -262,6 +263,7 @@ public class GameActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 1000){
             GameMessage gameMessage = new GameMessage(MessageType.VOTE_RESULT,info.id,writer,"");
+            Log.d("gameLog","Vote Result "+writer);
             Message message = new Message();
             message.obj = gameMessage;
             writeHandler.sendMessage(message);
@@ -280,7 +282,15 @@ public class GameActivity extends AppCompatActivity {
     private void showJob(GameMessage message){
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(message.writer).setMessage("직업은 "+ message.text+"입니다.")
+        String job;
+        if(message.text.compareTo("MAFIA") == 0){
+            job = "마피아";
+        }else if(message.text.compareTo("POLICE") == 0){
+            job = "경찰";
+        }else{
+            job = "시민";
+        }
+        builder.setTitle(message.writer).setMessage("직업은 "+ job+" 입니다.")
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
