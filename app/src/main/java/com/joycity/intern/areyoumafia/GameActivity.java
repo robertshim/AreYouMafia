@@ -272,6 +272,7 @@ public class GameActivity extends AppCompatActivity {
             Message message = new Message();
             message.obj = gameMessage;
             writeHandler.sendMessage(message);
+            /*
             dead1 = data.getStringExtra("dead");
             if( dead1.compareTo(writer) == 0){
                 try{
@@ -283,7 +284,7 @@ public class GameActivity extends AppCompatActivity {
                 }catch (IOException e){
                     e.printStackTrace();
                 }
-            }
+            }*/
         }else{
             if(resultCode == RESULT_OK){
                 isStart = false;
@@ -294,6 +295,7 @@ public class GameActivity extends AppCompatActivity {
                 numOfPerson.setText("참가 인원수 : "+String.valueOf(joinPerson));
             }
             else{
+                                /*
                 dead2 = data.getStringExtra("dead");
                 Log.d("gameLog","kill" + dead2);
                 if( dead2.compareTo(writer) == 0){
@@ -306,7 +308,7 @@ public class GameActivity extends AppCompatActivity {
                     }catch (IOException e){
                         e.printStackTrace();
                     }
-                }
+                }*/
             }
         }
     }

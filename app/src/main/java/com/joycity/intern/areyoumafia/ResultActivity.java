@@ -97,23 +97,13 @@ public class ResultActivity extends Activity {
                 victory.setVisibility(View.VISIBLE);
                 victory_id.setText(message.text);
                 jobImage.setImageResource(R.drawable.logo);
-                setResult(RESULT_OK);
-            }else if(message.writer.compareTo("CIVIL") == 0){
+            }else{
                 title.setText("시민의 승리입니다!");
                 victory.setVisibility(View.VISIBLE);
                 jobImage.setImageResource(R.drawable.person);
                 victory_id.setVisibility(View.GONE);
-                setResult(RESULT_OK);
-            }else{
-                title.setText("마피아에게 살해당했습니다.");
-                kill.setVisibility(View.VISIBLE);
-                dead_id.setText(message.writer);
-                dead_job.setText(message.text);
-                Intent intent = new Intent();
-                intent.putExtra("dead",message.writer);
-                setResult(RESULT_CANCELED,intent);
             }
-
+            setResult(RESULT_OK);
         }
     }
 }
